@@ -1,40 +1,25 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
+from MessageParser import MessageParser
 
 class MessageReceiver(Thread):
-    """
-    This is the message receiver class. The class inherits Thread, something that
-    is necessary to make the MessageReceiver start a new thread, and it allows
-    the chat client to both send and receive messages at the same time
-    """
-
-    def __init__(self, client, connection):
-      """
-      This method is executed when creating a new MessageReceiver object
-      """
-
-      # Flag to run thread as a deamon
-      self.daemon = True
-      self.client=client
-      self.connection=connection
-
-      # TODO: Finish initialization of MessageReceiver
-
-    def run(self):
-      while True:
-      	try:
-        	incomingMessage=connection.recieve()
-      	except:
-      		pass
-      	if incommingMessage:
-        	parsedMessage=MessageParser.parse(incomingMessage)
-        	self.recieve_message(parsedMessage)
-        else:
-
-        	self.stop()
-      # TODO: Make MessageReceiver receive and handle payloads
-
-      pass
-
-    def stop(self):
-    	self.client.disconnect()
+	def __init__(self, client, connection):
+		super(MessageReceiver,self).__init__()
+		self.daemon = True
+		self.client=client
+		self.connection=connection
+		self.msgParser=MessageParser()
+	def run(self):
+		print("Running messagereciever")
+		while True:
+			incomingMessage=self.connection.recv(4096)
+			if incomingMessage!="":
+				parsedMessage=self.msgParser.parse(incomingMessage)
+				if parsedMessage=="logout":
+					self.stop()
+				else:
+					print(parsedMessage)
+				#self.stop()
+		pass
+	def stop(self):
+		self.client.disconnect()
