@@ -32,9 +32,21 @@ class Client:
 		while True:
 			userInput=raw_input(":")
 			if userInput=="-login":
+#				self.connection.settimeout(0.5)
+#				try: 
+#					testRecieve=self.connection.recv(4096)
+#					print testRecieve
+#					if testRecieve=="":
+#						self.connection.connect((self.host,self.server_port))
+#				except socket.timeout:
+#					self.connection.settimeout(None)
+#					print("timeout")
+#				except:
+#					self.connection.settimeout(None)
+#					print("Tried to recoonect, failed")
+#				self.connection.settimeout(None)
 				userName=raw_input("Username: ")
 				data={"request":"login","content":userName.encode()}
-				print(userName)
 				try:
 					payload=json.dumps(data)
 					self.send_payload(payload)
@@ -74,16 +86,16 @@ class Client:
 						continue
 				else:
 					print("Invalid operation, consider logging in")
-		pass
+
   def disconnect(self):
 		self.connection.close()
-		pass
+
   def receive_message(self, message):
 		print(message)
-		pass
+
   def send_payload(self, data):
 		self.connection.send(data)
-		pass
+
     # More methods may be needed!
 
 

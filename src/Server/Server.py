@@ -60,7 +60,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.clientLoggedIn=False
         self.request=""
         self.data=""
-        atexit.register(closeConnection(self.username,self))
+        atexit.register(closeConnection(self.username,self.connection))
         # Loop that listens for messages from the client
         connections.append(self)
         while True:
@@ -75,7 +75,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             currTime=time.time()
             timestamp=datetime.datetime.fromtimestamp(currTime).strftime('%H:%M:%S')
             if recStr!="":
-                #recStr=self.connection.recv(4096)
+                #recStr=self.connection.recv(8192)
                 try:
                     jsonStr=json.loads(recStr)
                     self.data=jsonStr["content"]
@@ -103,6 +103,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     try:
                         payload=json.dumps(response)
                         self.connection.send(payload)
+                        print("Sending")
                     except:
                         print bcolors.FAIL + "Failed something"+bcolors.ENDC
 
@@ -145,7 +146,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             elif self.request=="logout" and self.clientLoggedIn:
                 print("Logout")
                 for conn in connections:
-                    conn.connection.send(json.dumps({"timestamp":timestamp,"response":"info","sender":"Server","content":self.username+" logged out"}))
+                    conn.connection.send(json.dumps({"timestamp":timestamp,"response":"info","sender":"Server","content":self.username.encode()+" logged out"}))
+                    print bcolors.WARNING+("sent logout to something")+bcolors.ENDC
                 self.connection.send(json.dumps({"timestamp":timestamp,"response":"logout","sender":"Server"}))
                 users.remove(self.username)
                 connections.remove(self)
@@ -161,6 +163,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     stringOfUsers+= "-" +user+"\n"
                 response={"timestamp":timestamp,"sender":"Server","response":"info","content":stringOfUsers}
                 self.connection.send(json.dumps(response))
+                print("Sent names")
             #end "names"
             elif self.request=="msg" and self.clientLoggedIn:
                 print("msg")
